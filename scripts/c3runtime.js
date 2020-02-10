@@ -661,6 +661,18 @@ self["C3_Shaders"]["scanlines"] = {
 
 "use strict";C3.Behaviors.bound.Exps={};
 
+"use strict";C3.Behaviors.destroy=class extends C3.SDKBehaviorBase{constructor(a){super(a)}Release(){super.Release()}};
+
+"use strict";C3.Behaviors.destroy.Type=class extends C3.SDKBehaviorTypeBase{constructor(a){super(a)}Release(){super.Release()}OnCreate(){}};
+
+"use strict";C3.Behaviors.destroy.Instance=class extends C3.SDKBehaviorInstanceBase{constructor(a){super(a),this._StartTicking()}Release(){super.Release()}Tick(){const a=this._inst.GetWorldInfo(),b=a.GetBoundingBox(),c=a.GetLayout();(0>b.getRight()||0>b.getBottom()||b.getLeft()>c.GetWidth()||b.getTop()>c.GetHeight())&&this._runtime.DestroyInstance(this._inst)}};
+
+"use strict";C3.Behaviors.destroy.Cnds={};
+
+"use strict";C3.Behaviors.destroy.Acts={};
+
+"use strict";C3.Behaviors.destroy.Exps={};
+
 "use strict"
 self.C3_GetObjectRefTable = function () {
 	return [
@@ -676,6 +688,7 @@ self.C3_GetObjectRefTable = function () {
 		C3.Behaviors.solid,
 		C3.Behaviors.Bullet,
 		C3.Behaviors.bound,
+		C3.Behaviors.destroy,
 		C3.Plugins.Sprite.Cnds.CompareY,
 		C3.Plugins.Sprite.Exps.Y,
 		C3.Plugins.System.Cnds.CompareVar,
@@ -726,8 +739,13 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.System.Cnds.Compare,
 		C3.Plugins.Sprite.Exps.Count,
 		C3.Behaviors.EightDir.Acts.SetMaxSpeed,
+		C3.Plugins.Sprite.Acts.SetBoolInstanceVar,
+		C3.Plugins.Sprite.Cnds.CompareInstanceVar,
 		C3.Plugins.Sprite.Acts.SetAnimFrame,
-		C3.Plugins.Sprite.Cnds.IsOutsideLayout,
+		C3.Plugins.Sprite.Cnds.OnDestroyed,
+		C3.Plugins.Sprite.Cnds.IsBoolInstanceVarSet,
+		C3.Plugins.Sprite.Acts.SetX,
+		C3.Plugins.Sprite.Acts.SubInstanceVar,
 		C3.Plugins.Sprite.Acts.SetScale,
 		C3.Plugins.Sprite.Cnds.CompareWidth,
 		C3.Plugins.Sprite.Acts.MoveToBottom,
@@ -739,7 +757,10 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Sprite.Acts.MoveForward,
 		C3.Plugins.Sprite.Acts.SetVisible,
 		C3.Plugins.Sprite.Cnds.IsAnimPlaying,
-		C3.Plugins.Sprite.Cnds.IsVisible
+		C3.Plugins.Sprite.Cnds.IsVisible,
+		C3.Plugins.Keyboard.Cnds.OnAnyKey,
+		C3.Plugins.Keyboard.Exps.LastKeyCode,
+		C3.Plugins.Keyboard.Exps.StringFromKeyCode
 	];
 };
 self.C3_JsPropNameTable = [
@@ -775,13 +796,43 @@ self.C3_JsPropNameTable = [
 	{Pong_Player_Score: 0},
 	{Pong_AI_Score: 0},
 	{Pong_Paused_Message: 0},
+	{ballsleft: 0},
 	{BoundToLayout: 0},
 	{Breakout_Paddle: 0},
 	{Breakout_Blocks: 0},
+	{flying: 0},
+	{DestroyOutsideLayout: 0},
 	{Breakout_Ball: 0},
 	{Breakout_Wall: 0},
 	{Breakout_Paused_Message: 0},
 	{Breakout_Score: 0},
+	{Settings_Static_Text: 0},
+	{posx: 0},
+	{posy: 0},
+	{Settings_Player_One_Up: 0},
+	{Settings_Player_One_Down: 0},
+	{Settings_Player_One_Left: 0},
+	{Settings_Player_One_Right: 0},
+	{Settings_Player_One_Z: 0},
+	{Settings_Player_One_X: 0},
+	{Settings_Player_One_Keys_Up: 0},
+	{Settings_Player_One_Keys_Down: 0},
+	{Settings_Player_One_Keys_Left: 0},
+	{Settings_Player_One_Keys_Right: 0},
+	{Settings_Player_One_Keys_Z: 0},
+	{Settings_Player_One_Keys_X: 0},
+	{Settings_Player_Two_Keys_Down: 0},
+	{Settings_Player_Two_Keys_Left: 0},
+	{Settings_Player_Two_Keys_Right: 0},
+	{Settings_Player_Two_Keys_Up: 0},
+	{Settings_Player_Two_Keys_X: 0},
+	{Settings_Player_Two_Keys_Z: 0},
+	{Settings_Player_Two_Left: 0},
+	{Settings_Player_Two_Right: 0},
+	{Settings_Player_Two_Up: 0},
+	{Settings_Player_Two_X: 0},
+	{Settings_Player_Two_Z: 0},
+	{Settings_Player_Two_Down: 0},
 	{Pong_Paused: 0},
 	{Snake_Start: 0},
 	{Snake_Move: 0},
@@ -810,7 +861,9 @@ self.C3_JsPropNameTable = [
 	{d2: 0},
 	{z2: 0},
 	{x2: 0},
-	{start2: 0}
+	{Settings_posx: 0},
+	{Settings_posy: 0},
+	{Settings_editing: 0}
 ];
 
 "use strict";
@@ -981,14 +1034,38 @@ self.C3_JsPropNameTable = [
 		() => "Pong_Control2",
 		() => "Breakout_Control",
 		p => {
+			const n0 = p._GetNode(0);
+			return () => and(n0.ExpInstVar(), " balls... Z to launch.");
+		},
+		p => {
 			const f0 = p._GetNode(0).GetBoundMethod();
 			return () => Math.round(f0(0, 5));
 		},
 		() => 129,
 		p => {
+			const n0 = p._GetNode(0);
+			return () => (n0.ExpObject() - 8);
+		},
+		p => {
+			const n0 = p._GetNode(0);
+			return () => and(n0.ExpInstVar(), " balls left... Z to launch.");
+		},
+		p => {
+			const n0 = p._GetNode(0);
+			return () => and(n0.ExpInstVar(), " ball left... Z to launch.");
+		},
+		() => 0.05,
+		p => {
+			const f0 = p._GetNode(0).GetBoundMethod();
+			return () => f0((-120), (-20));
+		},
+		p => {
 			const v0 = p._GetNode(0).GetVar();
 			return () => and("Score: ", v0.GetValue());
 		},
+		() => "YOU WIN! RESTARTING NOW...",
+		() => 0.1,
+		() => "YOU LOSE! RESTARTING NOW...",
 		p => {
 			const v0 = p._GetNode(0).GetVar();
 			return () => (v0.GetValue() + 0.05);
@@ -1041,7 +1118,22 @@ self.C3_JsPropNameTable = [
 		() => 87,
 		() => 83,
 		() => 74,
-		() => 75
+		() => 75,
+		() => "Selected",
+		() => "Unselected",
+		p => {
+			const f0 = p._GetNode(0).GetBoundMethod();
+			return () => f0();
+		},
+		() => "= Up Arrow",
+		p => {
+			const f0 = p._GetNode(0).GetBoundMethod();
+			const v1 = p._GetNode(1).GetVar();
+			return () => ("=" + f0(v1.GetValue()));
+		},
+		() => "= Down Arrow",
+		() => "= Left Arrow",
+		() => "= Right Arrow"
 	];
 }
 

@@ -833,6 +833,11 @@ self.C3_JsPropNameTable = [
 	{Settings_Player_Two_X: 0},
 	{Settings_Player_Two_Z: 0},
 	{Settings_Player_Two_Down: 0},
+	{Tron_Player1: 0},
+	{Tron_Player2: 0},
+	{Tron_Player1_Trail: 0},
+	{Tron_Player2_Trail: 0},
+	{Tron_Paused_Message: 0},
 	{Pong_Paused: 0},
 	{Snake_Start: 0},
 	{Snake_Move: 0},
@@ -843,6 +848,12 @@ self.C3_JsPropNameTable = [
 	{Pong_Player_Score2: 0},
 	{Pong_AI_Score2: 0},
 	{Breakout_Paused: 0},
+	{Tron_Paused: 0},
+	{Tron_Player1Move: 0},
+	{Tron_Player2Move: 0},
+	{Tron_Player1Growth: 0},
+	{Tron_Player2Growth: 0},
+	{Tron_gameover: 0},
 	{IntroductionScale: 0},
 	{Current_Game: 0},
 	{Current_Game_num: 0},
@@ -1066,6 +1077,9 @@ self.C3_JsPropNameTable = [
 		() => "YOU WIN! RESTARTING NOW...",
 		() => 0.1,
 		() => "YOU LOSE! RESTARTING NOW...",
+		() => "Tron_Control",
+		() => "Player 2 Wins!",
+		() => "Player 1 Wins!",
 		p => {
 			const v0 = p._GetNode(0).GetVar();
 			return () => (v0.GetValue() + 0.05);
@@ -1087,6 +1101,7 @@ self.C3_JsPropNameTable = [
 		() => "snake",
 		() => "pong",
 		() => "breakout",
+		() => "tron",
 		p => {
 			const n0 = p._GetNode(0);
 			return () => n0.ExpObject("snake");
@@ -1103,6 +1118,10 @@ self.C3_JsPropNameTable = [
 		p => {
 			const n0 = p._GetNode(0);
 			return () => n0.ExpObject("breakout");
+		},
+		p => {
+			const n0 = p._GetNode(0);
+			return () => n0.ExpObject("tron");
 		},
 		() => "Player Count Selector",
 		() => "one_player",
